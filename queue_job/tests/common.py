@@ -17,6 +17,19 @@ from odoo.addons.queue_job.delay import Graph
 from odoo.addons.queue_job.job import Job
 
 
+class DisableTrackingMixin:
+    """Disable chatter tracking for ORM-heavy tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        if not hasattr(cls, "env"):
+            return
+        context = dict(cls.env.context)
+        context["tracking_disable"] = True
+        cls.env = cls.env(context=context)
+
+
 @contextmanager
 def trap_jobs():
     """Context Manager used to test enqueuing of jobs
@@ -212,7 +225,7 @@ class JobsTrap:
 
         if expected_call not in actual_calls:
             raise AssertionError(
-                "Job {} was not enqueued.\n" "Actual enqueued jobs:\n{}".format(
+                "Job {} was not enqueued.\nActual enqueued jobs:\n{}".format(
                     self._format_job_call(expected_call),
                     "\n".join(
                         f" * {self._format_job_call(call)}" for call in actual_calls

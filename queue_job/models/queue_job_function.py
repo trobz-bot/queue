@@ -141,6 +141,7 @@ class QueueJobFunction(models.Model):
     def job_function_name(model_name, method_name):
         return f"<{model_name}>.{method_name}"
 
+    @api.private
     def job_default_config(self):
         return self.JobConfig(
             channel="root",
@@ -172,6 +173,7 @@ class QueueJobFunction(models.Model):
         return retry_pattern
 
     @tools.ormcache("name")
+    @api.private
     def job_config(self, name):
         config = self.search([("name", "=", name)], limit=1)
         if not config:

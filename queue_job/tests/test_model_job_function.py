@@ -4,8 +4,10 @@
 from odoo import exceptions
 from odoo.tests import common
 
+from .common import DisableTrackingMixin
 
-class TestJobFunction(common.TransactionCase):
+
+class TestJobFunction(DisableTrackingMixin, common.TransactionCase):
     def test_function_name_compute(self):
         function = self.env["queue.job.function"].create(
             {"model_id": self.env.ref("base.model_res_users").id, "method": "read"}

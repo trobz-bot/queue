@@ -856,8 +856,7 @@ class Job:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError(
-                "related_action must be the name of the "
-                "method on queue.job as string"
+                "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)
         action_kwargs = self.job_config.related_action_kwargs

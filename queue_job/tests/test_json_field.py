@@ -12,8 +12,10 @@ from odoo.tests import common
 # we are testing, we want to test as we were an external consumer of the API
 from odoo.addons.queue_job.fields import JobDecoder, JobEncoder
 
+from .common import DisableTrackingMixin
 
-class TestJson(common.TransactionCase):
+
+class TestJson(DisableTrackingMixin, common.TransactionCase):
     def test_encoder_recordset(self):
         demo_user = self.env.ref("base.user_demo")
         context = demo_user.context_get()
@@ -100,11 +102,22 @@ class TestJson(common.TransactionCase):
 
     def test_decoder_recordset_list_without_user(self):
         value_json = (
-            '["a", 1, {"_type": "odoo_recordset",' '"model": "res.users", "ids": [1]}]'
+            '["a", 1, {"_type": "odoo_recordset","model": "res.users", "ids": [1]}]'
         )
         expected = ["a", 1, self.env.ref("base.user_root")]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         self.assertEqual(value, expected)
+
+    def test_job_context_uses_env_timezone(self):
+        demo_user = self.env.ref("base.user_demo")
+        demo_user.tz = "Europe/Paris"
+        context = demo_user.context_get()
+        context.pop("tz", None)
+        partner = self.env(user=demo_user, context=context).ref("base.main_partner")
+
+        job_context = partner._job_prepare_context_before_enqueue()
+
+        self.assertEqual(job_context.get("tz"), "Europe/Paris")
 
     def test_encoder_datetime(self):
         value = ["a", 1, datetime(2017, 4, 19, 8, 48, 50, 1)]
@@ -132,7 +145,7 @@ class TestJson(common.TransactionCase):
         self.assertEqual(json.loads(value_json), expected)
 
     def test_decoder_date(self):
-        value_json = '["a", 1, {"_type": "date_isoformat",' '"value": "2017-04-19"}]'
+        value_json = '["a", 1, {"_type": "date_isoformat","value": "2017-04-19"}]'
         expected = ["a", 1, date(2017, 4, 19)]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         self.assertEqual(value, expected)

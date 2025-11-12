@@ -254,11 +254,22 @@ class Base(models.AbstractModel):
         """Return the context to store in the jobs
         Can be used to keep only safe keys.
         """
-        return {
-            key: value
-            for key, value in self.env.context.items()
-            if key in self._job_prepare_context_before_enqueue_keys()
-        }
+        allowed_keys = self._job_prepare_context_before_enqueue_keys()
+        env_context = self.env.context
+        job_context = {}
+
+        if "tz" in allowed_keys:
+            tz = self.env.tz
+            if tz:
+                job_context["tz"] = tz
+
+        for key in allowed_keys:
+            if key == "tz":
+                continue
+            if key in env_context:
+                job_context[key] = env_context[key]
+
+        return job_context
 
     @classmethod
     def _patch_method(cls, name, method):

@@ -1,8 +1,10 @@
 # license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 from odoo.tests import common
 
+from .common import DisableTrackingMixin
 
-class TestWizards(common.TransactionCase):
+
+class TestWizards(DisableTrackingMixin, common.TransactionCase):
     def setUp(self):
         super().setUp()
         self.job = (

@@ -4,9 +4,10 @@ from odoo.tests.common import TransactionCase
 
 from ..controllers.main import RunJobController
 from ..job import Job
+from .common import DisableTrackingMixin
 
 
-class TestRunJobController(TransactionCase):
+class TestRunJobController(DisableTrackingMixin, TransactionCase):
     def test_get_failure_values(self):
         method = self.env["res.users"].mapped
         job = Job(method)

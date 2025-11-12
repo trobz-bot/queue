@@ -5,8 +5,10 @@ from odoo import exceptions
 from odoo.tests import common
 from odoo.tools import mute_logger
 
+from .common import DisableTrackingMixin
 
-class TestJobCreatePrivate(common.HttpCase):
+
+class TestJobCreatePrivate(DisableTrackingMixin, common.HttpCase):
     def test_create_error(self):
         self.authenticate("admin", "admin")
         with self.assertRaises(common.JsonRpcException) as cm, mute_logger("odoo.http"):
@@ -29,7 +31,7 @@ class TestJobCreatePrivate(common.HttpCase):
         self.assertEqual("odoo.exceptions.AccessError", str(cm.exception))
 
 
-class TestJobWriteProtected(common.TransactionCase):
+class TestJobWriteProtected(DisableTrackingMixin, common.TransactionCase):
     def test_write_protected_field_error(self):
         job_ = self.env["res.partner"].with_delay().create({"name": "test"})
         db_job = job_.db_record()
