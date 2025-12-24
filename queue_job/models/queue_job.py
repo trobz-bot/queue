@@ -6,6 +6,7 @@ import random
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models
+from odoo.osv.expression import Domain
 from odoo.tools import config, html_escape, index_exists
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
@@ -376,7 +377,7 @@ class QueueJob(models.Model):
 
         :return: domain or False is no action
         """
-        return [("state", "=", "failed")]
+        return Domain([("state", "=", "failed")])
 
     def autovacuum(self):
         """Delete all jobs done based on the removal interval defined on the
