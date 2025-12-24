@@ -10,6 +10,7 @@ from unittest import TestCase, mock
 
 from odoo.tests.case import TestCase as _TestCase
 from odoo.tests.common import MetaCase
+from odoo.fields import Domain
 
 from odoo.addons.queue_job.delay import Graph
 
@@ -335,7 +336,7 @@ class JobCounter:
         return self.search_all() - self.existing
 
     def search_all(self):
-        return self.env["queue.job"].search([])
+        return self.env["queue.job"].search(Domain([]))
 
 
 class JobMixin:

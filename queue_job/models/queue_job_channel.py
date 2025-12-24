@@ -3,6 +3,7 @@
 
 
 from odoo import _, api, exceptions, fields, models
+from odoo.fields import Domain
 
 
 class QueueJobChannel(models.Model):
@@ -60,7 +61,12 @@ class QueueJobChannel(models.Model):
                 parent_id = vals.get("parent_id")
                 if name and parent_id:
                     existing = self.search(
-                        [("name", "=", name), ("parent_id", "=", parent_id)]
+                        Domain.AND(
+                            [
+                                Domain("name", "=", name),
+                                Domain("parent_id", "=", parent_id),
+                            ]
+                        )
                     )
                     if existing:
                         if not existing.get_metadata()[0].get("noupdate"):

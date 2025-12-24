@@ -6,7 +6,7 @@ import random
 from datetime import datetime, timedelta
 
 from odoo import _, api, exceptions, fields, models
-from odoo.osv.expression import Domain
+from odoo.fields import Domain
 from odoo.tools import config, html_escape, index_exists
 
 from odoo.addons.base_sparse_field.models.fields import Serialized
@@ -146,14 +146,9 @@ class QueueJob(models.Model):
 
     @api.depends("dependencies")
     def _compute_dependency_graph(self):
+        graph_uuids = [uuid for uuid in self.mapped("graph_uuid") if uuid]
         jobs_groups = self.env["queue.job"]._read_group(
-            [
-                (
-                    "graph_uuid",
-                    "in",
-                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
-                )
-            ],
+            Domain("graph_uuid", "in", graph_uuids),
             groupby=["graph_uuid"],
             aggregates=["id:array_agg"],
         )
@@ -215,14 +210,9 @@ class QueueJob(models.Model):
         }
 
     def _compute_graph_jobs_count(self):
+        graph_uuids = [uuid for uuid in self.mapped("graph_uuid") if uuid]
         jobs_groups = self.env["queue.job"]._read_group(
-            [
-                (
-                    "graph_uuid",
-                    "in",
-                    [uuid for uuid in self.mapped("graph_uuid") if uuid],
-                )
-            ],
+            Domain("graph_uuid", "in", graph_uuids),
             groupby=["graph_uuid"],
             aggregates=["__count"],
         )
@@ -282,7 +272,9 @@ class QueueJob(models.Model):
     def open_graph_jobs(self):
         """Return action that opens all jobs of the same graph"""
         self.ensure_one()
-        jobs = self.env["queue.job"].search([("graph_uuid", "=", self.graph_uuid)])
+        jobs = self.env["queue.job"].search(
+            Domain("graph_uuid", "=", self.graph_uuid)
+        )
 
         action = self.env["ir.actions.act_window"]._for_xml_id(
             "queue_job.action_queue_job"
@@ -291,7 +283,7 @@ class QueueJob(models.Model):
             {
                 "name": _("Jobs for graph %s") % (self.graph_uuid),
                 "context": {},
-                "domain": [("id", "in", jobs.ids)],
+                "domain": Domain("id", "in", jobs.ids),
             }
         )
         return action
@@ -351,11 +343,11 @@ class QueueJob(models.Model):
         """Subscribe all users having the 'Queue Job Manager' group"""
         group = self.env.ref("queue_job.group_queue_job_manager")
         if not group:
-            return None
+            return Domain([])
         companies = self.mapped("company_id")
-        domain = [("groups_id", "=", group.id)]
+        domain = Domain("groups_id", "=", group.id)
         if companies:
-            domain.append(("company_id", "in", companies.ids))
+            domain &= Domain("company_id", "in", companies.ids)
         return domain
 
     def _message_failed_job(self):
@@ -377,7 +369,7 @@ class QueueJob(models.Model):
 
         :return: domain or False is no action
         """
-        return Domain([("state", "=", "failed")])
+        return Domain("state", "=", "failed")
 
     def autovacuum(self):
         """Delete all jobs done based on the removal interval defined on the
@@ -385,16 +377,15 @@ class QueueJob(models.Model):
 
         Called from a cron.
         """
-        for channel in self.env["queue.job.channel"].search([]):
+        for channel in self.env["queue.job.channel"].search(Domain([])):
             deadline = datetime.now() - timedelta(days=int(channel.removal_interval))
             while True:
+                domain = Domain.OR(
+                    Domain("date_done", "<=", deadline),
+                    Domain("date_cancelled", "<=", deadline),
+                ) & Domain("channel", "=", channel.complete_name)
                 jobs = self.search(
-                    [
-                        "|",
-                        ("date_done", "<=", deadline),
-                        ("date_cancelled", "<=", deadline),
-                        ("channel", "=", channel.complete_name),
-                    ],
+                    domain,
                     order="date_done, date_created",
                     limit=1000,
                 )
@@ -434,7 +425,7 @@ class QueueJob(models.Model):
                 {
                     "name": _("Related Records"),
                     "view_mode": "list,form",
-                    "domain": [("id", "in", records.ids)],
+                    "domain": Domain("id", "in", records.ids),
                 }
             )
         return action

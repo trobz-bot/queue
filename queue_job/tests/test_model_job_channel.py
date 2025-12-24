@@ -5,13 +5,14 @@ from psycopg2 import IntegrityError
 
 import odoo
 from odoo.tests import common
+from odoo.fields import Domain
 
 
 class TestJobChannel(common.TransactionCase):
     def setUp(self):
         super().setUp()
         self.Channel = self.env["queue.job.channel"]
-        self.root_channel = self.Channel.search([("name", "=", "root")])
+        self.root_channel = self.Channel.search(Domain("name", "=", "root"))
 
     def test_channel_new(self):
         channel = self.Channel.new()
