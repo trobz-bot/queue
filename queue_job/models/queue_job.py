@@ -145,7 +145,7 @@ class QueueJob(models.Model):
 
     @api.depends("dependencies")
     def _compute_dependency_graph(self):
-        jobs_groups = self.env["queue.job"].read_group(
+        jobs_groups = self.env["queue.job"]._read_group(
             [
                 (
                     "graph_uuid",
@@ -153,12 +153,10 @@ class QueueJob(models.Model):
                     [uuid for uuid in self.mapped("graph_uuid") if uuid],
                 )
             ],
-            ["graph_uuid", "ids:array_agg(id)"],
-            ["graph_uuid"],
+            groupby=["graph_uuid"],
+            aggregates=["id:array_agg"],
         )
-        ids_per_graph_uuid = {
-            group["graph_uuid"]: group["ids"] for group in jobs_groups
-        }
+        ids_per_graph_uuid = {graph_uuid: ids for graph_uuid, ids in jobs_groups}
         for record in self:
             if not record.graph_uuid:
                 record.dependency_graph = {}
@@ -216,7 +214,7 @@ class QueueJob(models.Model):
         }
 
     def _compute_graph_jobs_count(self):
-        jobs_groups = self.env["queue.job"].read_group(
+        jobs_groups = self.env["queue.job"]._read_group(
             [
                 (
                     "graph_uuid",
@@ -224,12 +222,10 @@ class QueueJob(models.Model):
                     [uuid for uuid in self.mapped("graph_uuid") if uuid],
                 )
             ],
-            ["graph_uuid"],
-            ["graph_uuid"],
+            groupby=["graph_uuid"],
+            aggregates=["__count"],
         )
-        count_per_graph_uuid = {
-            group["graph_uuid"]: group["graph_uuid_count"] for group in jobs_groups
-        }
+        count_per_graph_uuid = {graph_uuid: count for graph_uuid, count in jobs_groups}
         for record in self:
             record.graph_jobs_count = count_per_graph_uuid.get(record.graph_uuid) or 0
 
