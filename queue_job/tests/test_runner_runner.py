@@ -5,11 +5,11 @@
 # we are testing, we want to test as we were an external consumer of the API
 import os
 
-from odoo.tests import BaseCase, tagged
+from odoo.tests import tagged
 
 from odoo.addons.queue_job.jobrunner import runner
 
-from .common import load_doctests
+from .common import BaseCase, load_doctests
 
 load_tests = load_doctests(runner)
 

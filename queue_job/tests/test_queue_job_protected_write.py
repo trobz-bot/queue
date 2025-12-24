@@ -2,14 +2,16 @@
 # license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 from odoo import exceptions
-from odoo.tests import common
+from odoo.tests.common import JsonRpcException
 from odoo.tools import mute_logger
 
+from .common import HttpCase, TransactionCase
 
-class TestJobCreatePrivate(common.HttpCase):
+
+class TestJobCreatePrivate(HttpCase):
     def test_create_error(self):
         self.authenticate("admin", "admin")
-        with self.assertRaises(common.JsonRpcException) as cm, mute_logger("odoo.http"):
+        with self.assertRaises(JsonRpcException) as cm, mute_logger("odoo.http"):
             self.make_jsonrpc_request(
                 "/web/dataset/call_kw",
                 params={
@@ -29,7 +31,7 @@ class TestJobCreatePrivate(common.HttpCase):
         self.assertEqual("odoo.exceptions.AccessError", str(cm.exception))
 
 
-class TestJobWriteProtected(common.TransactionCase):
+class TestJobWriteProtected(TransactionCase):
     def test_write_protected_field_error(self):
         job_ = self.env["res.partner"].with_delay().create({"name": "test"})
         db_job = job_.db_record()

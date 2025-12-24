@@ -7,6 +7,7 @@ import re
 from collections import namedtuple
 
 from odoo import _, api, exceptions, fields, models, tools
+from odoo.fields import Domain
 
 from ..fields import JobSerialized
 
@@ -95,7 +96,9 @@ class QueueJobFunction(models.Model):
         model_name = groups[1]
         method = groups[2]
         model = (
-            self.env["ir.model"].sudo().search([("model", "=", model_name)], limit=1)
+            self.env["ir.model"]
+            .sudo()
+            .search(Domain("model", "=", model_name), limit=1)
         )
         if not model:
             raise exceptions.UserError(_("Model {} not found").format(model_name))
@@ -173,7 +176,7 @@ class QueueJobFunction(models.Model):
 
     @tools.ormcache("name")
     def job_config(self, name):
-        config = self.search([("name", "=", name)], limit=1)
+        config = self.search(Domain("name", "=", name), limit=1)
         if not config:
             return self.job_default_config()
         retry_pattern = config._parse_retry_pattern()
@@ -250,7 +253,7 @@ class QueueJobFunction(models.Model):
             for vals in vals_list:
                 name = vals.get("name")
                 if name:
-                    existing = self.search([("name", "=", name)], limit=1)
+                    existing = self.search(Domain("name", "=", name), limit=1)
                     if existing:
                         if not existing.get_metadata()[0].get("noupdate"):
                             existing.write(vals)

@@ -5,12 +5,12 @@ import gc
 import logging
 from unittest import mock
 
-from odoo.tests import common
-
 from odoo.addons.queue_job.delay import Delayable, DelayableGraph
 
+from .common import BaseCase
 
-class TestDelayable(common.BaseCase):
+
+class TestDelayable(BaseCase):
     def setUp(self):
         super().setUp()
         self.recordset = mock.MagicMock(name="recordset")

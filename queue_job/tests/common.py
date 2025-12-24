@@ -8,6 +8,8 @@ from itertools import groupby
 from operator import attrgetter
 from unittest import TestCase, mock
 
+from odoo.fields import Domain
+from odoo.tests import common as odoo_common
 from odoo.tests.case import TestCase as _TestCase
 from odoo.tests.common import MetaCase
 
@@ -15,6 +17,27 @@ from odoo.addons.queue_job.delay import Graph
 
 # pylint: disable=odoo-addons-relative-import
 from odoo.addons.queue_job.job import Job
+
+
+class DisableTrackingCaseMixin:
+    """Disable tracking for the whole test environment."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
+
+
+class BaseCase(DisableTrackingCaseMixin, odoo_common.BaseCase):
+    pass
+
+
+class TransactionCase(DisableTrackingCaseMixin, odoo_common.TransactionCase):
+    pass
+
+
+class HttpCase(DisableTrackingCaseMixin, odoo_common.HttpCase):
+    pass
 
 
 @contextmanager
@@ -212,7 +235,7 @@ class JobsTrap:
 
         if expected_call not in actual_calls:
             raise AssertionError(
-                "Job {} was not enqueued.\n" "Actual enqueued jobs:\n{}".format(
+                "Job {} was not enqueued.\nActual enqueued jobs:\n{}".format(
                     self._format_job_call(expected_call),
                     "\n".join(
                         f" * {self._format_job_call(call)}" for call in actual_calls
@@ -335,7 +358,7 @@ class JobCounter:
         return self.search_all() - self.existing
 
     def search_all(self):
-        return self.env["queue.job"].search([])
+        return self.env["queue.job"].search(Domain([]))
 
 
 class JobMixin:

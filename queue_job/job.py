@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from random import randint
 
 import odoo
+from odoo.fields import Domain
 
 from .exception import FailedJobError, NoSuchJobError, RetryableJobError
 
@@ -337,23 +338,19 @@ class Job:
 
     def job_record_with_same_identity_key(self):
         """Check if a job to be executed with the same key exists."""
-        existing = (
-            self.env["queue.job"]
-            .sudo()
-            .search(
-                [
-                    ("identity_key", "=", self.identity_key),
-                    ("state", "in", [WAIT_DEPENDENCIES, PENDING, ENQUEUED]),
-                ],
-                limit=1,
-            )
+        domain = Domain.AND(
+            [
+                Domain("identity_key", "=", self.identity_key),
+                Domain("state", "in", [WAIT_DEPENDENCIES, PENDING, ENQUEUED]),
+            ]
         )
+        existing = self.env["queue.job"].sudo().search(domain, limit=1)
         return existing
 
     @staticmethod
     def db_records_from_uuids(env, job_uuids):
         model = env["queue.job"].sudo()
-        record = model.search([("uuid", "in", tuple(job_uuids))])
+        record = model.search(Domain("uuid", "in", tuple(job_uuids)))
         return record.with_env(env).sudo()
 
     def __init__(
@@ -856,8 +853,7 @@ class Job:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError(
-                "related_action must be the name of the "
-                "method on queue.job as string"
+                "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)
         action_kwargs = self.job_config.related_action_kwargs
