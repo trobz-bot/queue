@@ -11,7 +11,8 @@ from io import StringIO
 from psycopg2 import OperationalError, errorcodes
 from werkzeug.exceptions import BadRequest, Forbidden
 
-from odoo import SUPERUSER_ID, _, api, http
+from odoo import _, api, http
+from odoo.api import SUPERUSER_ID
 from odoo.modules.registry import Registry
 from odoo.service.model import PG_CONCURRENCY_ERRORS_TO_RETRY
 
