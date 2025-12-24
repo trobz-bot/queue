@@ -2,10 +2,11 @@
 # license lgpl-3.0 or later (http://www.gnu.org/licenses/lgpl.html)
 
 from odoo import exceptions
-from odoo.tests import common
+
+from .common import TransactionCase
 
 
-class TestJobFunction(common.TransactionCase):
+class TestJobFunction(TransactionCase):
     def test_function_name_compute(self):
         function = self.env["queue.job.function"].create(
             {"model_id": self.env.ref("base.model_res_users").id, "method": "read"}

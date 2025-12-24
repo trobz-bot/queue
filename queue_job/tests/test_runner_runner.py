@@ -5,7 +5,9 @@
 # we are testing, we want to test as we were an external consumer of the API
 import os
 
-from odoo.tests import BaseCase, tagged
+from odoo.tests import tagged
+
+from .common import BaseCase
 
 from odoo.addons.queue_job.jobrunner import runner
 

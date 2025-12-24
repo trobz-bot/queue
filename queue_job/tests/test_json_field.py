@@ -6,14 +6,14 @@ from datetime import date, datetime
 
 from lxml import etree
 
-from odoo.tests import common
+from .common import TransactionCase
 
 # pylint: disable=odoo-addons-relative-import
 # we are testing, we want to test as we were an external consumer of the API
 from odoo.addons.queue_job.fields import JobDecoder, JobEncoder
 
 
-class TestJson(common.TransactionCase):
+class TestJson(TransactionCase):
     def test_encoder_recordset(self):
         demo_user = self.env.ref("base.user_demo")
         context = demo_user.context_get()

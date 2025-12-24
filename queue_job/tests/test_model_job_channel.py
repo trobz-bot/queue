@@ -4,11 +4,12 @@
 from psycopg2 import IntegrityError
 
 import odoo
-from odoo.tests import common
 from odoo.fields import Domain
 
+from .common import TransactionCase
 
-class TestJobChannel(common.TransactionCase):
+
+class TestJobChannel(TransactionCase):
     def setUp(self):
         super().setUp()
         self.Channel = self.env["queue.job.channel"]
