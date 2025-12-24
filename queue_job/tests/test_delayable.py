@@ -5,9 +5,9 @@ import gc
 import logging
 from unittest import mock
 
-from .common import BaseCase
-
 from odoo.addons.queue_job.delay import Delayable, DelayableGraph
+
+from .common import BaseCase
 
 
 class TestDelayable(BaseCase):

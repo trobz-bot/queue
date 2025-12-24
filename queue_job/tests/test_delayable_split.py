@@ -2,9 +2,9 @@
 # @author Florian Mounier <florian.mounier@akretion.com>
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from .common import BaseCase
-
 from odoo.addons.queue_job.delay import Delayable
+
+from .common import BaseCase
 
 
 class TestDelayableSplit(BaseCase):

@@ -344,11 +344,7 @@ class Job:
                 Domain("state", "in", [WAIT_DEPENDENCIES, PENDING, ENQUEUED]),
             ]
         )
-        existing = (
-            self.env["queue.job"]
-            .sudo()
-            .search(domain, limit=1)
-        )
+        existing = self.env["queue.job"].sudo().search(domain, limit=1)
         return existing
 
     @staticmethod
@@ -857,8 +853,7 @@ class Job:
             funcname = record._default_related_action
         if not isinstance(funcname, str):
             raise ValueError(
-                "related_action must be the name of the "
-                "method on queue.job as string"
+                "related_action must be the name of the method on queue.job as string"
             )
         action = getattr(record, funcname)
         action_kwargs = self.job_config.related_action_kwargs

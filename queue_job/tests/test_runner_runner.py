@@ -7,11 +7,9 @@ import os
 
 from odoo.tests import tagged
 
-from .common import BaseCase
-
 from odoo.addons.queue_job.jobrunner import runner
 
-from .common import load_doctests
+from .common import BaseCase, load_doctests
 
 load_tests = load_doctests(runner)
 

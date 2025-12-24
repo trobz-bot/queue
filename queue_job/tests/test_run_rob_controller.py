@@ -1,9 +1,8 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from .common import TransactionCase
-
 from ..controllers.main import RunJobController
 from ..job import Job
+from .common import TransactionCase
 
 
 class TestRunJobController(TransactionCase):

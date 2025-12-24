@@ -272,9 +272,7 @@ class QueueJob(models.Model):
     def open_graph_jobs(self):
         """Return action that opens all jobs of the same graph"""
         self.ensure_one()
-        jobs = self.env["queue.job"].search(
-            Domain("graph_uuid", "=", self.graph_uuid)
-        )
+        jobs = self.env["queue.job"].search(Domain("graph_uuid", "=", self.graph_uuid))
 
         action = self.env["ir.actions.act_window"]._for_xml_id(
             "queue_job.action_queue_job"

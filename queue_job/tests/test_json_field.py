@@ -6,11 +6,11 @@ from datetime import date, datetime
 
 from lxml import etree
 
-from .common import TransactionCase
-
 # pylint: disable=odoo-addons-relative-import
 # we are testing, we want to test as we were an external consumer of the API
 from odoo.addons.queue_job.fields import JobDecoder, JobEncoder
+
+from .common import TransactionCase
 
 
 class TestJson(TransactionCase):
@@ -37,9 +37,8 @@ class TestJson(TransactionCase):
         )
 
     def _partner_with_user_context(self, context):
-        return (
-            self.env(user=self.demo_user, context=context)["res.partner"]
-            .browse(self.partner.id)
+        return self.env(user=self.demo_user, context=context)["res.partner"].browse(
+            self.partner.id
         )
 
     def test_encoder_recordset(self):
@@ -124,7 +123,7 @@ class TestJson(TransactionCase):
 
     def test_decoder_recordset_list_without_user(self):
         value_json = (
-            '["a", 1, {"_type": "odoo_recordset",' '"model": "res.users", "ids": [1]}]'
+            '["a", 1, {"_type": "odoo_recordset","model": "res.users", "ids": [1]}]'
         )
         expected = ["a", 1, self.env.ref("base.user_root")]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
@@ -156,7 +155,7 @@ class TestJson(TransactionCase):
         self.assertEqual(json.loads(value_json), expected)
 
     def test_decoder_date(self):
-        value_json = '["a", 1, {"_type": "date_isoformat",' '"value": "2017-04-19"}]'
+        value_json = '["a", 1, {"_type": "date_isoformat","value": "2017-04-19"}]'
         expected = ["a", 1, date(2017, 4, 19)]
         value = json.loads(value_json, cls=JobDecoder, env=self.env)
         self.assertEqual(value, expected)
